@@ -11,8 +11,8 @@ import yt_dlp
 app = Flask(__name__)
 CORS(app)
 
-YOUTUBE_API_KEY = "AIzaSyCceBHMIN7cbCKsCDSVCbl-6ZyqeWlpGNo"  # Your provided YouTube API key
-GEMINI_API_KEY = "AIzaSyDKtwCpSIxMO1Vxd8Dwl01isokGIo64xnc"  # Your provided Gemini API key
+YOUTUBE_API_KEY = ""  # Your provided YouTube API key
+GEMINI_API_KEY = ""  # Your provided Gemini API key
 
 def extract_video_id(url: str) -> str:
     m = re.search(r"(?:v=|youtu\.be/)([a-zA-Z0-9_-]{11})", url)
