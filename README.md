@@ -1,4 +1,3 @@
-Absolutely, Kiran. Here's a complete `README.md` content you can copy directly into your GitHub project:
 
 ---
 YouTube Analyzer
