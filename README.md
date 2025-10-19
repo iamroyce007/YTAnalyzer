@@ -43,10 +43,17 @@ Java JDBC Connector → Saves analyzed comments into MySQL database (triggered v
 Flask → Returns JSON to frontend → Dynamic visualization.
 
 Output Visualization
+
 ✅ Transcript fetched successfully
+
 ✅ AI-generated 400-word summary
+
 ✅ Positive/Negative/Neutral sentiment matrix
+
 ✅ Gemini Q&A chatbot working dynamically
+
 ✅ CSV or SQL data export ready
+
 Conclusion
+
 YTAnalyzer combines APIs, AI, and database systems into a unified hybrid application. It demonstrates how large language models like Gemini can enhance human understanding of video content, while TextBlob ML and JDBC integration provide tangible NLP insights and persistence.
