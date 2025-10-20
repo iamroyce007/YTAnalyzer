@@ -9,9 +9,11 @@ YouTube API, Gemini LLM, TextBlob, Sentiment Analysis, Flask, JDBC, MySQL
 1. Introduction / Background
 
 Online content creation has rapidly grown, and platforms like YouTube generate millions of comments and hours of video daily. Understanding this data manually is difficult and time-consuming. With the rise of AI-powered text understanding, it is now possible to extract valuable insights automatically. This project leverages Gemini LLM for summarization and intelligent Q&A, and TextBlob ML for comment sentiment classification, creating a seamless tool that combines Python’s AI ecosystem with Java’s robust database connectivity.
+
 2. Problem Statement
 
 Develop an AI-driven system that automatically extracts, analyzes, and visualizes YouTube video transcripts and comments, storing the data in a structured SQL database and allowing users to query the video through an LLM interface.
+
 3. Objectives
 
 Integrate YouTube Data API to fetch transcripts and comments.
