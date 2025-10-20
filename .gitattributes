@@ -1,5 +1,13 @@
-*.java linguist-detectable=true
-*.py linguist-detectable=false
-*.html linguist-detectable=false
-*.css linguist-detectable=false
-*.js linguist-detectable=false
+
+# Only count these core languages
+*.py    linguist-detectable=true
+*.java  linguist-detectable=true
+*.html  linguist-detectable=true
+
+# Ignore all others
+*.css   linguist-detectable=false
+*.js    linguist-detectable=false
+*.json  linguist-detectable=false
+*.csv   linguist-detectable=false
+*.md    linguist-detectable=false
+*.txt   linguist-detectable=false
