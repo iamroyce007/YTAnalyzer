@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>YT Analyzer</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -15,337 +15,79 @@
       --glass-blur: 20px;
       --glass-bg: rgba(255, 255, 255, 0.08);
     }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: var(--color-bg-dark);
-      color: white;
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow-x: hidden;
-      box-sizing: border-box;
-    }
-
-    .brain-core-background {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: clamp(300px, 50vw, 500px);
-      height: clamp(300px, 50vw, 500px);
-      perspective: 1000px;
-      z-index: -1;
-    }
-    .brain-core {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: radial-gradient(circle at center, rgba(0, 122, 255, 0.3) 0%, rgba(0, 122, 255, 0) 60%);
-      animation: rotate-core 30s linear infinite, pulse-glow 4s infinite alternate;
-      box-shadow: 0 0 100px rgba(0, 122, 255, 0.3);
-    }
-    @keyframes rotate-core { from { transform: rotateY(0deg) rotateX(0deg); } to { transform: rotateY(360deg) rotateX(360deg); } }
-    @keyframes pulse-glow { from { box-shadow: 0 0 80px rgba(0, 122, 255, 0.4); } to { box-shadow: 0 0 120px rgba(0, 122, 255, 0.6); } }
-
-    .main-container {
-      width: 100%;
-      max-width: 1200px;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-
-    .header-section h1 {
-      font-size: clamp(1.8rem, 5vw, 2.2rem);
-      font-weight: 700;
-      text-align: center;
-      color: var(--color-primary);
-      text-shadow: 0 0 10px rgba(0,122,255,0.5);
-      margin-bottom: 20px;
-    }
-
-    .input-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-      margin-bottom: 20px;
-    }
-    .input-area > * {
-      max-width: 700px;
-      width: 100%;
-      margin-bottom: 12px;
-    }
-
-    input[type="text"] {
-      padding: 14px 20px;
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 12px;
-      background: rgba(255,255,255,0.05);
-      color: white;
-      font-size: 1.1em;
-      outline: none;
-      backdrop-filter: blur(5px);
-      transition: all 0.3s;
-      box-sizing: border-box;
-    }
-    input[type="text"]:focus {
-      border-color: var(--color-primary);
-      box-shadow: 0 0 15px rgba(0,122,255,0.4);
-    }
-
-    button {
-      padding: 14px 30px;
-      background-color: var(--color-primary);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 1.1em;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
-      box-shadow: 0 4px 15px rgba(0,122,255,0.4);
-    }
-    button:hover:not(:disabled) {
-      background-color: #0056b3;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,122,255,0.6);
-    }
-    button:disabled {
-      background-color: #5d5d68;
-      cursor: wait;
-    }
-
-    .error {
-      color: var(--color-alert);
-      text-align: center;
-      font-weight: bold;
-      display: none;
-    }
-
-    .video-transcript-wrapper {
-      display: flex;
-      flex-direction: row;
-      gap: 25px;
-      align-items: flex-start;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .video-panel {
-      flex: 2;
-      width: 100%;
-    }
-    .transcript-panel {
-      flex: 1;
-      max-height: 450px;
-      overflow-y: auto;
-      padding: 15px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      box-sizing: border-box;
-    }
-
-    iframe {
-      width: 100%;
-      height: clamp(200px, 40vw, 450px);
-      border-radius: 12px;
-      border: 2px solid var(--color-primary);
-      box-sizing: border-box;
-    }
-
-    .transcript-item {
-      margin-bottom: 10px;
-      border-bottom: 1px dashed rgba(255,255,255,0.1);
-      padding-bottom: 5px;
-      font-size: 0.9em;
-    }
-    .transcript-item span {
-      color: var(--color-secondary);
-      font-weight: 700;
-      margin-right: 8px;
-    }
-
-    .comments-section {
-      margin-top: 25px;
-      padding: 20px;
-      border-radius: 15px;
-      background: var(--glass-bg);
-      border: 1px solid rgba(255,255,255,0.1);
-      backdrop-filter: blur(var(--glass-blur));
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .comments-columns {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .category {
-      flex: 1;
-      min-width: 250px;
-    }
-    .category h3 {
-      border-bottom: 2px solid currentColor;
-      padding-bottom: 5px;
-    }
-    .positive h3 { color: var(--color-secondary); }
-    .negative h3 { color: var(--color-alert); }
-    .neutral h3 { color: var(--color-neutral); }
-    .content-box {
-      max-height: 200px;
-      overflow-y: auto;
-      padding: 10px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 10px;
-    }
-    .comment-stats {
-      margin-top: 8px;
-      font-size: 0.85em;
-      color: #ccc;
-    }
-
-    .ai-chat {
-      margin-top: 30px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      padding: 20px;
-      border-radius: 15px;
-      backdrop-filter: blur(20px);
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .ai-chat h2 {
-      color: var(--color-primary);
-      font-size: 1.4rem;
-    }
-    .chat-log {
-      max-height: 200px;
-      overflow-y: auto;
-      margin-bottom: 15px;
-    }
-    .chat-entry {
-      margin: 8px 0;
-    }
-    .user-msg {
-      color: #fff;
-      text-align: right;
-    }
-    .ai-msg {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-    }
-    .gemini-logo {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: linear-gradient(135deg,#007aff,#5ac8fa);
-      animation: pulse-gemini 1.5s infinite alternate;
-    }
-    @keyframes pulse-gemini {
-      from { box-shadow: 0 0 8px rgba(0,122,255,0.3); transform: scale(1); }
-      to { box-shadow: 0 0 20px rgba(0,122,255,0.7); transform: scale(1.1); }
-    }
-
-    .ai-chat input {
-      width: calc(100% - 130px);
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
-      background: rgba(255,255,255,0.08);
-      color: white;
-      box-sizing: border-box;
-    }
-    .ai-chat button {
-      margin-left: 10px;
-      padding: 10px 20px;
-      font-size: 1em;
-    }
-
-    .hidden { display: none; }
-
-    @media (max-width: 1024px) {
-      .video-transcript-wrapper {
-        flex-direction: column;
-      }
-      .video-panel, .transcript-panel {
-        width: 100%;
-      }
-      iframe {
-        height: clamp(200px, 50vw, 300px);
-      }
-    }
-    @media (max-width: 600px) {
-      .main-container {
-        padding: 10px;
-      }
-      .header-section h1 {
-        font-size: clamp(1.5rem, 4vw, 1.8rem);
-      }
-      .input-area > * {
-        max-width: 100%;
-      }
-      .ai-chat input {
-        width: calc(100% - 100px);
-      }
-      .comments-columns {
-        flex-direction: column;
-      }
-      .category {
-        min-width: 100%;
-      }
-    }
+    body { font-family: 'Inter', sans-serif; background:#1e1e2c; color:#fff; margin:0; padding:0; min-height:100vh; display:flex; justify-content:center; }
+    .container { width:100%; max-width:1100px; padding:24px; box-sizing:border-box; }
+    h1 { text-align:center; color:var(--color-primary); margin-bottom:18px; text-shadow:0 0 10px rgba(0,122,255,0.4); }
+    .input-area { display:flex; gap:12px; justify-content:center; margin-bottom:18px; }
+    input[type="text"] { width:100%; max-width:760px; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.03); color:#fff; outline:none; }
+    button { padding:10px 18px; border-radius:10px; border:none; background:var(--color-primary); color:#fff; font-weight:600; cursor:pointer; }
+    button:disabled { opacity:0.6; cursor:wait; }
+    .layout { display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; }
+    .video-panel { flex:2; min-width:300px; }
+    .transcript-panel { flex:1; min-width:280px; max-height:460px; overflow:auto; padding:12px; background:rgba(255,255,255,0.03); border-radius:10px; border:1px solid rgba(255,255,255,0.04); }
+    iframe { width:100%; height:360px; border-radius:10px; border:2px solid var(--color-primary); }
+    .comment-area { margin-top:16px; padding:12px; background:var(--glass-bg); border-radius:12px; border:1px solid rgba(255,255,255,0.06); }
+    .columns { display:flex; gap:12px; flex-wrap:wrap; }
+    .col { flex:1; min-width:200px; }
+    .col h3 { margin:0 0 8px 0; }
+    .box { max-height:180px; overflow:auto; padding:8px; background:rgba(0,0,0,0.15); border-radius:8px; }
+    .stats { margin-top:8px; color:#cfcfcf; font-size:0.9em; }
+    .ai-chat { margin-top:18px; padding:12px; border-radius:10px; background:rgba(255,255,255,0.03); }
+    .chat-log { max-height:160px; overflow:auto; margin-bottom:8px; }
+    .chat-entry { margin:6px 0; }
+    .user-msg { text-align:right; }
+    .ai-msg { display:flex; gap:10px; align-items:flex-start; }
+    .gemini { width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg,#007aff,#5ac8fa); }
+    .error { color:var(--color-alert); text-align:center; margin-top:8px; display:none; }
+    @media (max-width: 900px) { .layout { flex-direction:column; } iframe { height:240px; } }
   </style>
 </head>
 <body>
-  <div class="brain-core-background"><div class="brain-core"></div></div>
-  <div class="main-container">
-    <div class="header-section"><h1>YT Analyzer</h1></div>
+  <div class="container">
+    <h1>YT Analyzer</h1>
 
     <div class="input-area">
-      <input type="text" id="videoUrl" placeholder="Paste YouTube video URL here for analysis...">
+      <input id="videoUrl" type="text" placeholder="Paste YouTube URL (watch, youtu.be, shorts)"/>
       <button id="submitBtn">Analyze Transcript & Comments</button>
-      <div id="errorMsg" class="error"></div>
     </div>
 
-    <div id="analysisArea" class="hidden">
-      <div class="video-transcript-wrapper">
-        <div class="video-panel">
-          <iframe id="videoFrame" allowfullscreen></iframe>
-        </div>
-        <div class="transcript-panel" id="transcripts"></div>
+    <div id="errorMsg" class="error"></div>
+
+    <div class="layout">
+      <div class="video-panel">
+        <iframe id="videoFrame" allowfullscreen src=""></iframe>
       </div>
 
-      <div class="comments-section">
-        <h2>Comment Sentiment Matrix</h2>
-        <div class="comments-columns">
-          <div class="category positive">
-            <h3>Positive</h3>
-            <div id="commentsPositive" class="content-box"></div>
-            <div id="positiveStats" class="comment-stats"></div>
-          </div>
-          <div class="category negative">
-            <h3>Negative</h3>
-            <div id="commentsNegative" class="content-box"></div>
-            <div id="negativeStats" class="comment-stats"></div>
-          </div>
-          <div class="category neutral">
-            <h3>Neutral</h3>
-            <div id="commentsNeutral" class="content-box"></div>
-            <div id="neutralStats" class="comment-stats"></div>
-          </div>
+      <div class="transcript-panel" id="transcripts">
+        <em>Transcript & AI summary will appear here after analysis.</em>
+      </div>
+    </div>
+
+    <div class="comment-area">
+      <h2>Comment Sentiment Matrix</h2>
+      <div class="columns">
+        <div class="col">
+          <h3 style="color:var(--color-secondary)">Positive</h3>
+          <div id="commentsPositive" class="box">—</div>
+          <div id="positiveStats" class="stats"></div>
+        </div>
+        <div class="col">
+          <h3 style="color:var(--color-alert)">Negative</h3>
+          <div id="commentsNegative" class="box">—</div>
+          <div id="negativeStats" class="stats"></div>
+        </div>
+        <div class="col">
+          <h3 style="color:var(--color-neutral)">Neutral</h3>
+          <div id="commentsNeutral" class="box">—</div>
+          <div id="neutralStats" class="stats"></div>
         </div>
       </div>
 
       <div class="ai-chat">
-        <h2>Ask Gemini AI about this Video</h2>
-        <div class="chat-log" id="chatLog"></div>
-        <div style="display: flex;">
-          <input id="aiQuestion" type="text" placeholder="Ask something about this video...">
+        <h3>Ask Gemini AI about this video</h3>
+        <div id="chatLog" class="chat-log"></div>
+        <div style="display:flex;gap:8px;">
+          <input id="aiQuestion" type="text" placeholder="Ask something about this video..." style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:#fff;" />
           <button id="askBtn">Ask</button>
         </div>
       </div>
@@ -353,136 +95,114 @@
   </div>
 
 <script>
+  // === CONFIG ===
+  // When testing locally keep localhost; replace with your Render URL when deployed.
+  const API_BASE = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? "http://localhost:5000"
+    : "https://RENDER_BACKEND_URL"; // <<-- Replace RENDER_BACKEND_URL with your Render service domain
+
+  function extractVideoId(url) {
+    if (!url) return null;
+    // try common forms
+    let m = url.match(/(?:v=|youtu\.be\/|\/shorts\/)([a-zA-Z0-9_-]{11})/);
+    return m ? m[1] : null;
+  }
+
+  const submitBtn = document.getElementById('submitBtn');
   const videoFrame = document.getElementById('videoFrame');
   const transcriptsDiv = document.getElementById('transcripts');
   const commentsPositive = document.getElementById('commentsPositive');
   const commentsNegative = document.getElementById('commentsNegative');
   const commentsNeutral = document.getElementById('commentsNeutral');
   const chatLog = document.getElementById('chatLog');
+  const errorMsg = document.getElementById('errorMsg');
 
-  // ✅ FIXED VIDEO ID EXTRACTOR (supports watch, youtu.be, shorts, playlists, timestamps)
-  function extractVideoId(url) {
-    let videoId = null;
-
-    // Watch URLs
-    if (url.includes("v=")) {
-      videoId = url.split("v=")[1].split("&")[0];
-    }
-    // Short URLs
-    else if (url.includes("youtu.be/")) {
-      videoId = url.split("youtu.be/")[1].split("?")[0];
-    }
-    // Shorts URLs
-    else if (url.includes("/shorts/")) {
-      videoId = url.split("/shorts/")[1].split("?")[0];
-    }
-
-    return videoId;
-  }
-
-  const submitBtn = document.getElementById('submitBtn');
-  submitBtn.onclick = async () => {
+  submitBtn.addEventListener('click', async () => {
     const url = document.getElementById('videoUrl').value.trim();
-    const videoId = extractVideoId(url);
-    const analysisArea = document.getElementById('analysisArea');
-    const errorMsg = document.getElementById('errorMsg');
-
-    if (!videoId) {
+    const vid = extractVideoId(url);
+    if (!vid) {
       errorMsg.textContent = "Invalid YouTube URL.";
       errorMsg.style.display = "block";
       return;
     }
-
     errorMsg.style.display = "none";
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Processing...";
 
-    // ✅ FIXED — using proper embed URL
-    videoFrame.src = `https://www.youtube.com/embed/${videoId}`;
-    analysisArea.classList.remove("hidden");
-
-    transcriptsDiv.innerHTML = "<em>Loading transcript...</em>";
+    videoFrame.src = `https://www.youtube.com/embed/${vid}`;
+    transcriptsDiv.innerHTML = "<em>Loading transcript and summary...</em>";
     commentsPositive.innerHTML = commentsNegative.innerHTML = commentsNeutral.innerHTML = "<em>Fetching comments...</em>";
 
     try {
-      const res = await fetch('http://localhost:5000/process', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch(`${API_BASE}/process`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ video_url: url })
       });
-
       const data = await res.json();
-      transcriptsDiv.innerHTML = '';
+      if (!res.ok) throw new Error(data.error || "Server error");
 
-      if (res.status !== 200) throw new Error(data.error || "Error fetching data.");
-
+      // show summary
+      transcriptsDiv.innerHTML = "";
       if (data.summary) {
-        const summaryBox = document.createElement('div');
-        summaryBox.className = 'ai-summary';
-        summaryBox.style.marginBottom = "15px";
-        summaryBox.style.padding = "15px";
-        summaryBox.style.borderRadius = "10px";
-        summaryBox.style.background = "rgba(255,255,255,0.05)";
-        summaryBox.innerHTML = `<h3 style="color:#34c759;">AI Summary</h3><p>${data.summary}</p>`;
-        transcriptsDiv.appendChild(summaryBox);
+        const box = document.createElement('div');
+        box.style.padding = "10px";
+        box.style.borderRadius = "8px";
+        box.style.background = "rgba(255,255,255,0.02)";
+        box.style.marginBottom = "10px";
+        box.innerHTML = `<strong>AI Summary</strong><p style="margin:8px 0 0 0">${data.summary}</p>`;
+        transcriptsDiv.appendChild(box);
       }
 
       if (data.transcripts && Array.isArray(data.transcripts)) {
         data.transcripts.forEach(t => {
           const d = document.createElement('div');
           d.className = 'transcript-item';
-          const time = new Date((t.start || 0) * 1000).toISOString().substr(11, 8);
-          d.innerHTML = `<span>${time}</span> ${t.text || 'No text available'}`;
+          const time = new Date((t.start || 0) * 1000).toISOString().substr(11,8);
+          d.innerHTML = `<span style="color:var(--color-secondary);font-weight:700;margin-right:8px">${time}</span> ${t.text || ''}`;
           transcriptsDiv.appendChild(d);
         });
-      } else {
-        transcriptsDiv.innerHTML += "<em>No transcript found.</em>";
       }
 
-      commentsPositive.innerHTML = (data.comments_positive || []).map(c => `<div class='transcript-item'>${c}</div>`).join('') || "<em>No positive comments.</em>";
-      commentsNegative.innerHTML = (data.comments_negative || []).map(c => `<div class='transcript-item'>${c}</div>`).join('') || "<em>No negative comments.</em>";
-      commentsNeutral.innerHTML = (data.comments_neutral || []).map(c => `<div class='transcript-item'>${c}</div>`).join('') || "<em>No neutral comments.</em>";
+      commentsPositive.innerHTML = (data.comments_positive || []).map(c => `<div>${c}</div>`).join('') || "<em>No positive comments.</em>";
+      commentsNegative.innerHTML = (data.comments_negative || []).map(c => `<div>${c}</div>`).join('') || "<em>No negative comments.</em>";
+      commentsNeutral.innerHTML = (data.comments_neutral || []).map(c => `<div>${c}</div>`).join('') || "<em>No neutral comments.</em>";
 
-      document.getElementById('positiveStats').innerHTML =
-        `Count: ${data.comment_counts.positive} | ${data.comment_percentages.positive}%`;
-      document.getElementById('negativeStats').innerHTML =
-        `Count: ${data.comment_counts.negative} | ${data.comment_percentages.negative}%`;
-      document.getElementById('neutralStats').innerHTML =
-        `Count: ${data.comment_counts.neutral} | ${data.comment_percentages.neutral}%`;
+      document.getElementById('positiveStats').innerText = `Count: ${data.comment_counts.positive} | ${data.comment_percentages.positive}%`;
+      document.getElementById('negativeStats').innerText = `Count: ${data.comment_counts.negative} | ${data.comment_percentages.negative}%`;
+      document.getElementById('neutralStats').innerText = `Count: ${data.comment_counts.neutral} | ${data.comment_percentages.neutral}%`;
 
     } catch (err) {
-      transcriptsDiv.innerHTML = `Error: ${err.message}`;
+      transcriptsDiv.innerHTML = `<div style="color:var(--color-alert)">Error: ${err.message}</div>`;
       console.error(err);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Analyze Transcript & Comments";
     }
-  };
+  });
 
-  document.getElementById('askBtn').onclick = async () => {
+  document.getElementById('askBtn').addEventListener('click', async () => {
     const question = document.getElementById('aiQuestion').value.trim();
-    if (!question) return;
+    const videoUrl = document.getElementById('videoUrl').value.trim();
+    if (!question || !videoUrl) return;
+    const userDiv = document.createElement('div'); userDiv.className = 'chat-entry user-msg'; userDiv.textContent = question; chatLog.appendChild(userDiv);
 
-    const userDiv = document.createElement('div');
-    userDiv.className = 'chat-entry user-msg';
-    userDiv.textContent = question;
-    chatLog.appendChild(userDiv);
-
-    const aiDiv = document.createElement('div');
-    aiDiv.className = 'chat-entry ai-msg';
-    aiDiv.innerHTML = `<div class="gemini-logo"></div><div>Thinking...</div>`;
-    chatLog.appendChild(aiDiv);
+    const aiDiv = document.createElement('div'); aiDiv.className = 'chat-entry ai-msg'; aiDiv.innerHTML = `<div class="gemini"></div><div>Thinking...</div>`; chatLog.appendChild(aiDiv);
     document.getElementById('aiQuestion').value = '';
 
     try {
-      const res = await fetch('http://localhost:5000/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ video_url: document.getElementById('videoUrl').value, question })
+      const res = await fetch(`${API_BASE}/ask`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ video_url: videoUrl, question })
       });
       const data = await res.json();
-      if (res.status !== 200) throw new Error(data.error || "Error fetching AI answer.");
-      aiDiv.innerHTML = `<div class="gemini-logo"></div><div>${data.answer}</div>`;
+      if (!res.ok) throw new Error(data.error || "AI error");
+      aiDiv.innerHTML = `<div class="gemini"></div><div>${data.answer}</div>`;
     } catch (err) {
-      aiDiv.innerHTML = `<div class="gemini-logo"></div><div>Error: ${err.message}</div>`;
+      aiDiv.innerHTML = `<div class="gemini"></div><div style="color:var(--color-alert)">Error: ${err.message}</div>`;
     }
-  };
+  });
 </script>
-
 </body>
 </html>
