@@ -15,8 +15,8 @@ app = Flask(__name__, static_folder="static", static_url_path="/static")
 CORS(app)
 
 # ---------------- API Keys ----------------
-YOUTUBE_API_KEY = "AIzaSyBP3eJQFQV4j0VtPigBJXdL_BRTxK2d2xg"
-GEMINI_API_KEY = "AIzaSyBFFNd3PfcRtQfbLYz2L5eUXBOh16Zw7zY"
+YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 genai.configure(api_key=GEMINI_API_KEY)
 
@@ -138,7 +138,6 @@ def process():
     except ValueError:
         return jsonify({"error": "Invalid YouTube URL"}), 400
 
-    # --- Transcript ---
     transcript = try_youtube_transcript_api(video_id)
     if not transcript:
         transcript = try_yt_dlp(url, video_id)
@@ -147,7 +146,6 @@ def process():
 
     transcript_text = " ".join([entry.get("text", "") for entry in transcript if entry.get("text")])
 
-    # --- Gemini Summary ---
     try:
         model = genai.GenerativeModel("gemini-2.5-flash")
         prompt = f"Write a detailed descriptive summary of this YouTube video in around 400 words:\n\n{transcript_text[:10000]}"
@@ -156,7 +154,6 @@ def process():
     except Exception as e:
         summary = f"AI summarization failed: {str(e)}"
 
-    # --- Comments ---
     comments_raw = get_comments(video_id)
     comments_data = []
     s_no = 1
@@ -168,7 +165,6 @@ def process():
         comments_data.append({"s_no": s_no, "comment": text, "sentiment": sentiment})
         s_no += 1
 
-    # Save CSV
     csv_path = "comments.csv"
     if os.path.exists(csv_path):
         try:
@@ -180,7 +176,6 @@ def process():
         df = pd.DataFrame(comments_data, columns=["s_no", "comment", "sentiment"])
         df.to_csv(csv_path, index=False, encoding="utf-8")
 
-        # --- Trigger Java Program Automatically ---
         print("Java Program Triggered JDBC Active")
 
         try:
@@ -198,7 +193,6 @@ def process():
     else:
         java_output = "❌ No comments CSV created, Java program not triggered."
 
-    # --- Sentiment Summary ---
     pos_comments = [c["comment"] for c in comments_data if c["sentiment"] == "Positive"]
     neg_comments = [c["comment"] for c in comments_data if c["sentiment"] == "Negative"]
     neu_comments = [c["comment"] for c in comments_data if c["sentiment"] == "Neutral"]
