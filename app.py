@@ -11,7 +11,7 @@ import yt_dlp
 import pandas as pd
 from textblob import TextBlob
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static", static_url_path="/static")
 CORS(app)
 
 # ---------------- API Keys ----------------
@@ -246,12 +246,12 @@ def ask_question():
 
     try:
         model = genai.GenerativeModel("gemini-2.5-flash")
-        prompt = f"""You are an AI assistant. Answer clearly and concisely based on the transcript below.
+        prompt = f\"\"\"You are an AI assistant. Answer clearly and concisely based on the transcript below.
 
 Transcript:
 {transcript_text[:12000]}
 
-Question: {question}"""
+Question: {question}\"\"\"
         response = model.generate_content(prompt)
         answer = response.text.strip() if response and hasattr(response, "text") else "No answer generated."
     except Exception as e:
@@ -259,6 +259,15 @@ Question: {question}"""
 
     return jsonify({"question": question, "answer": answer})
 
+# Serve index.html when root requested
+@app.route("/", methods=["GET"])
+def root():
+    try:
+        return app.send_static_file("index.html")
+    except Exception:
+        return "YT Analyzer backend running."
+
 # ---------------- Run ----------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
