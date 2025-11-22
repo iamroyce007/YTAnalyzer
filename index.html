@@ -99,7 +99,7 @@
   // When testing locally keep localhost; replace with your Render URL when deployed.
   const API_BASE = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
     ? "http://localhost:5000"
-    : "https://RENDER_BACKEND_URL"; // <<-- Replace RENDER_BACKEND_URL with your Render service domain
+    : "https://ytanalyzer.onrender.com"; // <<-- Replace RENDER_BACKEND_URL with your Render service domain
 
   function extractVideoId(url) {
     if (!url) return null;
