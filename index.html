@@ -1,371 +1,488 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Transcript & Comments Analyzer</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f3f4f6;
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 24px;
-        }
-        h1 {
-            font-size: 24px;
-            color: #1f2937;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .input-section {
-            margin-bottom: 24px;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        input[type="text"]:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 8px;
-            transition: background-color 0.2s;
-        }
-        button:hover:not(:disabled) {
-            background-color: #2563eb;
-        }
-        button:disabled {
-            background-color: #9ca3af;
-            cursor: not-allowed;
-        }
-        .error {
-            color: #dc2626;
-            text-align: center;
-            margin-bottom: 16px;
-            display: none;
-        }
-        .content {
-            display: flex;
-            gap: 20px;
-        }
-        .left-column, .right-column {
-            width: 50%;
-        }
-        .video-section {
-            margin-bottom: 20px;
-        }
-        .video-section iframe {
-            width: 100%;
-            height: 300px;
-            border-radius: 6px;
-            border: none;
-        }
-        .section {
-            margin-bottom: 20px;
-        }
-        .section h2 {
-            font-size: 20px;
-            color: #374151;
-            margin-bottom: 12px;
-        }
-        .content-box {
-            max-height: 400px;
-            overflow-y: auto;
-            background-color: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            padding: 16px;
-        }
-        .summary-box {
-            background-color: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-        .transcript-item, .comment-item {
-            margin-bottom: 12px;
-            font-size: 14px;
-            color: #1f2937;
-        }
-        .transcript-item span {
-            color: #6b7280;
-            margin-right: 8px;
-            font-weight: bold;
-        }
-        .comment-item {
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 8px;
-        }
-        .percentages {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 16px;
-        }
-        .percentage {
-            text-align: center;
-            font-weight: bold;
-        }
-        .positive .percentage {
-            color: #22c55e; /* green */
-        }
-        .negative .percentage {
-            color: #ef4444; /* red */
-        }
-        .neutral .percentage {
-            color: #6b7280; /* gray */
-        }
-        .comments-columns {
-            display: flex;
-            gap: 10px;
-        }
-        .category {
-            width: 33%;
-            padding: 10px;
-            border-radius: 6px;
-        }
-        .positive {
-            background-color: #dcfce7; /* light green */
-        }
-        .negative {
-            background-color: #fee2e2; /* light red */
-        }
-        .neutral {
-            background-color: #f3f4f6; /* light gray */
-        }
-        .hidden {
-            display: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YT Analyzer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #007aff;
+      --color-secondary: #34c759;
+      --color-alert: #ff3b30;
+      --color-neutral: #a9a9b0;
+      --color-bg-dark: #1e1e2c;
+      --glass-blur: 20px;
+      --glass-bg: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--color-bg-dark);
+      color: white;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      box-sizing: border-box;
+    }
+
+    .brain-core-background {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: clamp(300px, 50vw, 500px);
+      height: clamp(300px, 50vw, 500px);
+      perspective: 1000px;
+      z-index: -1;
+    }
+    .brain-core {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, rgba(0, 122, 255, 0.3) 0%, rgba(0, 122, 255, 0) 60%);
+      animation: rotate-core 30s linear infinite, pulse-glow 4s infinite alternate;
+      box-shadow: 0 0 100px rgba(0, 122, 255, 0.3);
+    }
+    @keyframes rotate-core { from { transform: rotateY(0deg) rotateX(0deg); } to { transform: rotateY(360deg) rotateX(360deg); } }
+    @keyframes pulse-glow { from { box-shadow: 0 0 80px rgba(0, 122, 255, 0.4); } to { box-shadow: 0 0 120px rgba(0, 122, 255, 0.6); } }
+
+    .main-container {
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .header-section h1 {
+      font-size: clamp(1.8rem, 5vw, 2.2rem);
+      font-weight: 700;
+      text-align: center;
+      color: var(--color-primary);
+      text-shadow: 0 0 10px rgba(0,122,255,0.5);
+      margin-bottom: 20px;
+    }
+
+    .input-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .input-area > * {
+      max-width: 700px;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    input[type="text"] {
+      padding: 14px 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      color: white;
+      font-size: 1.1em;
+      outline: none;
+      backdrop-filter: blur(5px);
+      transition: all 0.3s;
+      box-sizing: border-box;
+    }
+    input[type="text"]:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 15px rgba(0,122,255,0.4);
+    }
+
+    button {
+      padding: 14px 30px;
+      background-color: var(--color-primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+      box-shadow: 0 4px 15px rgba(0,122,255,0.4);
+    }
+    button:hover:not(:disabled) {
+      background-color: #0056b3;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,122,255,0.6);
+    }
+    button:disabled {
+      background-color: #5d5d68;
+      cursor: wait;
+    }
+
+    .error {
+      color: var(--color-alert);
+      text-align: center;
+      font-weight: bold;
+      display: none;
+    }
+
+    .video-transcript-wrapper {
+      display: flex;
+      flex-direction: row;
+      gap: 25px;
+      align-items: flex-start;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .video-panel {
+      flex: 2;
+      width: 100%;
+    }
+    .transcript-panel {
+      flex: 1;
+      max-height: 450px;
+      overflow-y: auto;
+      padding: 15px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      box-sizing: border-box;
+    }
+
+    iframe {
+      width: 100%;
+      height: clamp(200px, 40vw, 450px);
+      border-radius: 12px;
+      border: 2px solid var(--color-primary);
+      box-sizing: border-box;
+    }
+
+    .transcript-item {
+      margin-bottom: 10px;
+      border-bottom: 1px dashed rgba(255,255,255,0.1);
+      padding-bottom: 5px;
+      font-size: 0.9em;
+    }
+    .transcript-item span {
+      color: var(--color-secondary);
+      font-weight: 700;
+      margin-right: 8px;
+    }
+
+    .comments-section {
+      margin-top: 25px;
+      padding: 20px;
+      border-radius: 15px;
+      background: var(--glass-bg);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(var(--glass-blur));
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .comments-columns {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .category {
+      flex: 1;
+      min-width: 250px;
+    }
+    .category h3 {
+      border-bottom: 2px solid currentColor;
+      padding-bottom: 5px;
+    }
+    .positive h3 { color: var(--color-secondary); }
+    .negative h3 { color: var(--color-alert); }
+    .neutral h3 { color: var(--color-neutral); }
+    .content-box {
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+    }
+    .comment-stats {
+      margin-top: 8px;
+      font-size: 0.85em;
+      color: #ccc;
+    }
+
+    .ai-chat {
+      margin-top: 30px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 15px;
+      backdrop-filter: blur(20px);
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .ai-chat h2 {
+      color: var(--color-primary);
+      font-size: 1.4rem;
+    }
+    .chat-log {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+    }
+    .chat-entry {
+      margin: 8px 0;
+    }
+    .user-msg {
+      color: #fff;
+      text-align: right;
+    }
+    .ai-msg {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .gemini-logo {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg,#007aff,#5ac8fa);
+      animation: pulse-gemini 1.5s infinite alternate;
+    }
+    @keyframes pulse-gemini {
+      from { box-shadow: 0 0 8px rgba(0,122,255,0.3); transform: scale(1); }
+      to { box-shadow: 0 0 20px rgba(0,122,255,0.7); transform: scale(1.1); }
+    }
+
+    .ai-chat input {
+      width: calc(100% - 130px);
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255,255,255,0.08);
+      color: white;
+      box-sizing: border-box;
+    }
+    .ai-chat button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      font-size: 1em;
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 1024px) {
+      .video-transcript-wrapper {
+        flex-direction: column;
+      }
+      .video-panel, .transcript-panel {
+        width: 100%;
+      }
+      iframe {
+        height: clamp(200px, 50vw, 300px);
+      }
+    }
+    @media (max-width: 600px) {
+      .main-container {
+        padding: 10px;
+      }
+      .header-section h1 {
+        font-size: clamp(1.5rem, 4vw, 1.8rem);
+      }
+      .input-area > * {
+        max-width: 100%;
+      }
+      .ai-chat input {
+        width: calc(100% - 100px);
+      }
+      .comments-columns {
+        flex-direction: column;
+      }
+      .category {
+        min-width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>YouTube Transcript & Comments Analyzer</h1>
-        <div class="input-section">
-            <input type="text" id="videoUrl" placeholder="Enter YouTube video URL">
-            <button id="submitBtn">Extract Transcript & Comments</button>
-        </div>
-        <div id="errorMsg" class="error"></div>
-        <div class="content">
-            <div class="left-column">
-                <div id="videoSection" class="video-section hidden">
-                    <iframe id="videoFrame" src=""></iframe>
-                </div>
-                <div id="summarySection" class="section hidden">
-                    <h2>Transcript Summary</h2>
-                    <div id="summary" class="summary-box"></div>
-                </div>
-                <div id="transcriptsSection" class="section hidden">
-                    <h2>Transcripts</h2>
-                    <div id="transcripts" class="content-box"></div>
-                </div>
-            </div>
-            <div class="right-column">
-                <div id="commentsSection" class="section hidden">
-                    <h2>Comments Analysis</h2>
-                    <div id="percentages" class="percentages"></div>
-                    <div class="comments-columns">
-                        <div class="category positive">
-                            <h3>Positive</h3>
-                            <div id="commentsPositive" class="content-box"></div>
-                        </div>
-                        <div class="category negative">
-                            <h3>Negative</h3>
-                            <div id="commentsNegative" class="content-box"></div>
-                        </div>
-                        <div class="category neutral">
-                            <h3>Neutral</h3>
-                            <div id="commentsNeutral" class="content-box"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="brain-core-background"><div class="brain-core"></div></div>
+  <div class="main-container">
+    <div class="header-section"><h1>YT Analyzer</h1></div>
+
+    <div class="input-area">
+      <input type="text" id="videoUrl" placeholder="Paste YouTube video URL here for analysis...">
+      <button id="submitBtn">Analyze Transcript & Comments</button>
+      <div id="errorMsg" class="error"></div>
     </div>
-    <script>
-        const videoUrl = document.getElementById('videoUrl');
-        const submitBtn = document.getElementById('submitBtn');
-        const errorMsg = document.getElementById('errorMsg');
-        const videoSection = document.getElementById('videoSection');
-        const videoFrame = document.getElementById('videoFrame');
-        const summarySection = document.getElementById('summarySection');
-        const summaryDiv = document.getElementById('summary');
-        const transcriptsSection = document.getElementById('transcriptsSection');
-        const transcriptsDiv = document.getElementById('transcripts');
-        const commentsSection = document.getElementById('commentsSection');
-        const percentagesDiv = document.getElementById('percentages');
-        const commentsPositive = document.getElementById('commentsPositive');
-        const commentsNegative = document.getElementById('commentsNegative');
-        const commentsNeutral = document.getElementById('commentsNeutral');
 
-        function extractVideoId(url) {
-            const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-            return match ? match[1] : null;
-        }
+    <div id="analysisArea" class="hidden">
+      <div class="video-transcript-wrapper">
+        <div class="video-panel">
+          <iframe id="videoFrame" allowfullscreen></iframe>
+        </div>
+        <div class="transcript-panel" id="transcripts"></div>
+      </div>
 
-        submitBtn.addEventListener('click', async () => {
-            if (!videoUrl.value.trim()) {
-                errorMsg.textContent = 'Please enter a YouTube URL';
-                errorMsg.style.display = 'block';
-                return;
-            }
+      <div class="comments-section">
+        <h2>Comment Sentiment Matrix</h2>
+        <div class="comments-columns">
+          <div class="category positive">
+            <h3>Positive</h3>
+            <div id="commentsPositive" class="content-box"></div>
+            <div id="positiveStats" class="comment-stats"></div>
+          </div>
+          <div class="category negative">
+            <h3>Negative</h3>
+            <div id="commentsNegative" class="content-box"></div>
+            <div id="negativeStats" class="comment-stats"></div>
+          </div>
+          <div class="category neutral">
+            <h3>Neutral</h3>
+            <div id="commentsNeutral" class="content-box"></div>
+            <div id="neutralStats" class="comment-stats"></div>
+          </div>
+        </div>
+      </div>
 
-            const videoId = extractVideoId(videoUrl.value);
-            if (!videoId) {
-                errorMsg.textContent = 'Invalid YouTube URL';
-                errorMsg.style.display = 'block';
-                return;
-            }
+      <div class="ai-chat">
+        <h2>Ask Gemini AI about this Video</h2>
+        <div class="chat-log" id="chatLog"></div>
+        <div style="display: flex;">
+          <input id="aiQuestion" type="text" placeholder="Ask something about this video...">
+          <button id="askBtn">Ask</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Processing...';
-            errorMsg.style.display = 'none';
-            videoSection.classList.add('hidden');
-            summarySection.classList.add('hidden');
-            transcriptsSection.classList.add('hidden');
-            commentsSection.classList.add('hidden');
-            summaryDiv.innerHTML = '';
-            transcriptsDiv.innerHTML = '';
-            percentagesDiv.innerHTML = '';
-            commentsPositive.innerHTML = '';
-            commentsNegative.innerHTML = '';
-            commentsNeutral.innerHTML = '';
+<script>
+  const videoFrame = document.getElementById('videoFrame');
+  const transcriptsDiv = document.getElementById('transcripts');
+  const commentsPositive = document.getElementById('commentsPositive');
+  const commentsNegative = document.getElementById('commentsNegative');
+  const commentsNeutral = document.getElementById('commentsNeutral');
+  const chatLog = document.getElementById('chatLog');
 
-            try {
-                // Embed video
-                videoFrame.src = `https://www.youtube.com/embed/${videoId}`;
-                videoSection.classList.remove('hidden');
+  // ✅ FIXED VIDEO ID EXTRACTOR (supports watch, youtu.be, shorts, playlists, timestamps)
+  function extractVideoId(url) {
+    let videoId = null;
 
-                // Fetch data
-                const response = await fetch('http://localhost:5000/process', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ video_url: videoUrl.value })
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    if (data.summary) {
-                        summaryDiv.textContent = data.summary;
-                        summarySection.classList.remove('hidden');
-                    }
-                    if (data.transcripts && data.transcripts.length) {
-                        data.transcripts.forEach(t => {
-                            const div = document.createElement('div');
-                            div.className = 'transcript-item';
-                            const time = new Date(t.start * 1000).toISOString().substr(11, 8);
-                            div.innerHTML = `<span>${time}:</span> ${t.text}`;
-                            transcriptsDiv.appendChild(div);
-                        });
-                        transcriptsSection.classList.remove('hidden');
-                    }
-                    if (data.percentages) {
-                        const pos = document.createElement('div');
-                        pos.className = 'percentage positive';
-                        pos.textContent = `Positive: ${data.percentages.positive.toFixed(2)}% (${data.comments_positive.length} comments)`;
-                        const neg = document.createElement('div');
-                        neg.className = 'percentage negative';
-                        neg.textContent = `Negative: ${data.percentages.negative.toFixed(2)}% (${data.comments_negative.length} comments)`;
-                        const neu = document.createElement('div');
-                        neu.className = 'percentage neutral';
-                        neu.textContent = `Neutral: ${data.percentages.neutral.toFixed(2)}% (${data.comments_neutral.length} comments)`;
-                        percentagesDiv.appendChild(pos);
-                        percentagesDiv.appendChild(neg);
-                        percentagesDiv.appendChild(neu);
+    // Watch URLs
+    if (url.includes("v=")) {
+      videoId = url.split("v=")[1].split("&")[0];
+    }
+    // Short URLs
+    else if (url.includes("youtu.be/")) {
+      videoId = url.split("youtu.be/")[1].split("?")[0];
+    }
+    // Shorts URLs
+    else if (url.includes("/shorts/")) {
+      videoId = url.split("/shorts/")[1].split("?")[0];
+    }
 
-                        data.comments_positive.forEach(c => {
-                            const div = document.createElement('div');
-                            div.className = 'comment-item';
-                            div.textContent = c;
-                            commentsPositive.appendChild(div);
-                        });
-                        data.comments_negative.forEach(c => {
-                            const div = document.createElement('div');
-                            div.className = 'comment-item';
-                            div.textContent = c;
-                            commentsNegative.appendChild(div);
-                        });
-                        data.comments_neutral.forEach(c => {
-                            const div = document.createElement('div');
-                            div.className = 'comment-item';
-                            div.textContent = c;
-                            commentsNeutral.appendChild(div);
-                        });
-                        commentsSection.classList.remove('hidden');
-                    }
-                } else {
-                    errorMsg.textContent = data.error || 'Failed to fetch data';
-                    errorMsg.style.display = 'block';
-                }
-            } catch (err) {
-                errorMsg.textContent = 'Error connecting to server';
-                errorMsg.style.display = 'block';
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Extract Transcript & Comments';
-            }
+    return videoId;
+  }
+
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.onclick = async () => {
+    const url = document.getElementById('videoUrl').value.trim();
+    const videoId = extractVideoId(url);
+    const analysisArea = document.getElementById('analysisArea');
+    const errorMsg = document.getElementById('errorMsg');
+
+    if (!videoId) {
+      errorMsg.textContent = "Invalid YouTube URL.";
+      errorMsg.style.display = "block";
+      return;
+    }
+
+    errorMsg.style.display = "none";
+
+    // ✅ FIXED — using proper embed URL
+    videoFrame.src = `https://www.youtube.com/embed/${videoId}`;
+    analysisArea.classList.remove("hidden");
+
+    transcriptsDiv.innerHTML = "<em>Loading transcript...</em>";
+    commentsPositive.innerHTML = commentsNegative.innerHTML = commentsNeutral.innerHTML = "<em>Fetching comments...</em>";
+
+    try {
+      const res = await fetch('http://localhost:5000/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ video_url: url })
+      });
+
+      const data = await res.json();
+      transcriptsDiv.innerHTML = '';
+
+      if (res.status !== 200) throw new Error(data.error || "Error fetching data.");
+
+      if (data.summary) {
+        const summaryBox = document.createElement('div');
+        summaryBox.className = 'ai-summary';
+        summaryBox.style.marginBottom = "15px";
+        summaryBox.style.padding = "15px";
+        summaryBox.style.borderRadius = "10px";
+        summaryBox.style.background = "rgba(255,255,255,0.05)";
+        summaryBox.innerHTML = `<h3 style="color:#34c759;">AI Summary</h3><p>${data.summary}</p>`;
+        transcriptsDiv.appendChild(summaryBox);
+      }
+
+      if (data.transcripts && Array.isArray(data.transcripts)) {
+        data.transcripts.forEach(t => {
+          const d = document.createElement('div');
+          d.className = 'transcript-item';
+          const time = new Date((t.start || 0) * 1000).toISOString().substr(11, 8);
+          d.innerHTML = `<span>${time}</span> ${t.text || 'No text available'}`;
+          transcriptsDiv.appendChild(d);
         });
-    </script>
+      } else {
+        transcriptsDiv.innerHTML += "<em>No transcript found.</em>";
+      }
+
+      commentsPositive.innerHTML = (data.comments_positive || []).map(c => `<div class='transcript-item'>${c}</div>`).join('') || "<em>No positive comments.</em>";
+      commentsNegative.innerHTML = (data.comments_negative || []).map(c => `<div class='transcript-item'>${c}</div>`).join('') || "<em>No negative comments.</em>";
+      commentsNeutral.innerHTML = (data.comments_neutral || []).map(c => `<div class='transcript-item'>${c}</div>`).join('') || "<em>No neutral comments.</em>";
+
+      document.getElementById('positiveStats').innerHTML =
+        `Count: ${data.comment_counts.positive} | ${data.comment_percentages.positive}%`;
+      document.getElementById('negativeStats').innerHTML =
+        `Count: ${data.comment_counts.negative} | ${data.comment_percentages.negative}%`;
+      document.getElementById('neutralStats').innerHTML =
+        `Count: ${data.comment_counts.neutral} | ${data.comment_percentages.neutral}%`;
+
+    } catch (err) {
+      transcriptsDiv.innerHTML = `Error: ${err.message}`;
+      console.error(err);
+    }
+  };
+
+  document.getElementById('askBtn').onclick = async () => {
+    const question = document.getElementById('aiQuestion').value.trim();
+    if (!question) return;
+
+    const userDiv = document.createElement('div');
+    userDiv.className = 'chat-entry user-msg';
+    userDiv.textContent = question;
+    chatLog.appendChild(userDiv);
+
+    const aiDiv = document.createElement('div');
+    aiDiv.className = 'chat-entry ai-msg';
+    aiDiv.innerHTML = `<div class="gemini-logo"></div><div>Thinking...</div>`;
+    chatLog.appendChild(aiDiv);
+    document.getElementById('aiQuestion').value = '';
+
+    try {
+      const res = await fetch('http://localhost:5000/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ video_url: document.getElementById('videoUrl').value, question })
+      });
+      const data = await res.json();
+      if (res.status !== 200) throw new Error(data.error || "Error fetching AI answer.");
+      aiDiv.innerHTML = `<div class="gemini-logo"></div><div>${data.answer}</div>`;
+    } catch (err) {
+      aiDiv.innerHTML = `<div class="gemini-logo"></div><div>Error: ${err.message}</div>`;
+    }
+  };
+</script>
+
 </body>
 </html>
