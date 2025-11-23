@@ -10,12 +10,16 @@ from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, No
 import yt_dlp
 import pandas as pd
 from textblob import TextBlob
+<<<<<<< HEAD
 from dotenv import load_dotenv
 import logging
+=======
+>>>>>>> 5997e2238928d5fc025fa1b2754efe76af723e19
 
 app = Flask(__name__, static_folder="static", static_url_path="/static")
 CORS(app)
 
+<<<<<<< HEAD
 # Basic logging for production
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
 logger = logging.getLogger(__name__)
@@ -26,15 +30,21 @@ DEBUG = os.environ.get("DEBUG", "false").lower() in ("1", "true", "yes")
 # Load local .env for development (ignored in production)
 load_dotenv()
 
+=======
+>>>>>>> 5997e2238928d5fc025fa1b2754efe76af723e19
 # ---------------- API Keys ----------------
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
+<<<<<<< HEAD
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
     logger.info("Gemini API configured")
 else:
     logger.warning("GEMINI_API_KEY not set. Gemini features will be disabled.")
+=======
+genai.configure(api_key=GEMINI_API_KEY)
+>>>>>>> 5997e2238928d5fc025fa1b2754efe76af723e19
 
 # ---------------- Helper Functions ----------------
 def extract_video_id(url: str) -> str:
@@ -90,7 +100,11 @@ def try_youtube_transcript_api(video_id: str):
     except (TranscriptsDisabled, NoTranscriptFound):
         return []
     except Exception as e:
+<<<<<<< HEAD
         logger.exception(f"youtube-transcript-api failed: {e}")
+=======
+        print(f"youtube-transcript-api failed: {e}")
+>>>>>>> 5997e2238928d5fc025fa1b2754efe76af723e19
         return []
 
 def try_yt_dlp(url: str, video_id: str):
@@ -113,6 +127,7 @@ def try_yt_dlp(url: str, video_id: str):
         vtt_path = sorted(candidates, key=lambda p: (0 if "en" in p else 1, len(p)))[0]
         return parse_vtt_to_rows(vtt_path)
     except Exception as e:
+<<<<<<< HEAD
         logger.exception(f"yt-dlp failed: {e}")
         return []
 
@@ -120,6 +135,12 @@ def get_comments(video_id: str):
     if not YOUTUBE_API_KEY:
         logger.warning("YOUTUBE_API_KEY not set. Skipping comment fetch.")
         return []
+=======
+        print(f"yt-dlp failed: {e}")
+        return []
+
+def get_comments(video_id: str):
+>>>>>>> 5997e2238928d5fc025fa1b2754efe76af723e19
     try:
         youtube = build("youtube", "v3", developerKey=YOUTUBE_API_KEY)
         comments = []
@@ -132,7 +153,11 @@ def get_comments(video_id: str):
             request = youtube.commentThreads().list_next(request, response)
         return comments
     except Exception as e:
+<<<<<<< HEAD
         logger.exception(f"Error fetching comments: {e}")
+=======
+        print(f"Error fetching comments: {e}")
+>>>>>>> 5997e2238928d5fc025fa1b2754efe76af723e19
         return []
 
 def analyze_sentiment(comment):
@@ -198,6 +223,7 @@ def process():
         print("Java Program Triggered JDBC Active")
 
         try:
+<<<<<<< HEAD
             # Java execution is optional in production. Enable by setting RUN_JAVA=true
             run_java = os.environ.get("RUN_JAVA", "false").lower() in ("1", "true", "yes")
             if run_java:
@@ -221,6 +247,19 @@ def process():
             else:
                 java_output = "Java execution disabled (set RUN_JAVA=true to enable)."
                 logger.info("Skipping Java execution")
+=======
+            java_class_path = "C:\\Users\\aniru\\IdeaProjects\\bruh\\src"
+            mysql_jar_path = "C:\\Users\\aniru\\IdeaProjects\\bruh\\lib\\mysql-connector-j-9.4.0.jar"
+            result = subprocess.run(
+                ["java", "-cp", f"{java_class_path};{mysql_jar_path}", "MyJDBC"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            java_output = result.stdout
+        except subprocess.CalledProcessError as e:
+            java_output = f"Java execution failed:\n{e.stderr}"
+>>>>>>> 5997e2238928d5fc025fa1b2754efe76af723e19
     else:
         java_output = "❌ No comments CSV created, Java program not triggered."
 
@@ -255,6 +294,7 @@ def ask_question():
     question = data.get("question")
     if not url or not question:
         return jsonify({"error": "Missing video_url or question"}), 400
+<<<<<<< HEAD
     if not GEMINI_API_KEY:
         answer = "Gemini API key not configured. Question-answering is disabled in this environment."
         logger.warning("ask endpoint called but GEMINI_API_KEY not configured")
@@ -272,6 +312,20 @@ Question: {question}"""
         except Exception as e:
             logger.exception("AI question answering failed")
             answer = f"AI question answering failed: {str(e)}"
+=======
+
+    try:
+        video_id = extract_video_id(url)
+    except ValueError:
+        return jsonify({"error": "Invalid YouTube URL"}), 400
+
+    transcript = try_youtube_transcript_api(video_id)
+    if not transcript:
+        transcript = try_yt_dlp(url, video_id)
+    if not transcript:
+        return jsonify({"error": "No transcript found for this video"}), 404
+
+>>>>>>> 5997e2238928d5fc025fa1b2754efe76af723e19
     transcript_text = " ".join([entry.get("text", "") for entry in transcript])
 
     try:
@@ -297,6 +351,7 @@ def root():
     except Exception:
         return "YT Analyzer backend running."
 
+<<<<<<< HEAD
 
 @app.route("/health", methods=["GET"])
 def health():
@@ -307,3 +362,9 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     # Only enable Flask debug when DEBUG is explicitly set
     app.run(host="0.0.0.0", port=port, debug=DEBUG)
+=======
+# ---------------- Run ----------------
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
+>>>>>>> 5997e2238928d5fc025fa1b2754efe76af723e19
