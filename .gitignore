@@ -1,0 +1,16 @@
+# Ignore local environment file containing secrets
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints
+
+# Environment folders
+venv/
+.env.local
+
+# OS files
+.DS_Store
