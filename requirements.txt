@@ -7,7 +7,5 @@ yt-dlp
 pandas
 textblob
 gunicorn
-<<<<<<< HEAD
+
 python-dotenv
-=======
->>>>>>> 5997e2238928d5fc025fa1b2754efe76af723e19
